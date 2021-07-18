@@ -53,7 +53,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             synchronized (this){
                 //先查询Bot是否已经关注过该内容了 tip:这里默认空就是不订阅 以后拓展要修改
                 Subscription sub = subMapper.selectRelation(UserEnum.BOT.getUid(), subscription.getFid(), subscription.getType());
-                if (sub != null){
+                if (sub != null && sub.getStatus() == 1){
                     return;
                 }
 

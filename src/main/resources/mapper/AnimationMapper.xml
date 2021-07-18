@@ -43,11 +43,9 @@
 
     <select id="selectAnimationByMedia_id" parameterType="Integer" resultMap="Animation">
         select animation.*, rating.*
-        from animation, rating
-        where animation.media_id = rating.media_id
-        <if test=" media_id != null">
-            and animation.media_id = #{media_id}
-        </if>
+        from animation left join rating
+        on animation.media_id = rating.media_id
+        where animation.media_id = #{media_id}
     </select>
 
     <select id="selectBySeasonId" parameterType="Integer" resultType="com.zfg.learn.model.po.Animation">

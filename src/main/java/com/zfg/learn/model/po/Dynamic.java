@@ -2,6 +2,8 @@ package com.zfg.learn.model.po;
 
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.Date;
+
 
 /**
  * 动态
@@ -30,6 +32,12 @@ public class Dynamic {
 
     @ApiModelProperty("类型")
     private Integer type;
+
+    @ApiModelProperty("创建时间")
+    private Integer ctime;
+
+    @ApiModelProperty("时间日期格式")
+    private Date date;
 
     public Long getId() {
         return id;
@@ -93,5 +101,21 @@ public class Dynamic {
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    public Integer getCtime() {
+        return ctime;
+    }
+
+    public void setCtime(Integer ctime) {
+        this.ctime = ctime;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 }

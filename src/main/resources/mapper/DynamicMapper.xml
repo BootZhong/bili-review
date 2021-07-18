@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.zfg.learn.dao.DynamicMapper">
+   <!-- <select id="selectGroupByHours" resultType="com.zfg.learn.model.dto.TimeCount">
+        SELECT
+        DATE_FORMAT(date, '%H' ) as time,
+        count(*) as count
+        FROM `dynamic`
+        GROUP BY time
+        ORDER BY count DESC
+    </select>-->
+
+    <insert id="insertBatch">
+        insert into dynamic
+        (id, authorName, authorId, url, content, img, type, ctime)
+        values
+        <foreach item="dynamic" separator="," collection="dynamicList">
+            (
+            #{dynamic.id},
+            #{dynamic.authorName},
+            #{dynamic.authorId},
+            #{dynamic.url},
+            #{dynamic.content},
+            #{dynamic.img},
+            #{dynamic.type},
+            #{dynamic.ctime}
+            )
+        </foreach>
+    </insert>
+
+    <insert id="insert" parameterType="com.zfg.learn.model.po.Dynamic">
+        insert into dynamic
+        (id, authorName, authorId, url, content, img, type, ctime, date)
+        values
+        (
+            #{id},
+            #{authorName},
+            #{authorId},
+            #{url},
+            #{content},
+            #{img},
+            #{type},
+            #{ctime},
+            FROM_UNIXTIME(#{ctime},'%Y-%m-%d %H:%i:%S')
+        )
+    </insert>
+</mapper>

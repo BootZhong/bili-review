@@ -10,11 +10,13 @@ import com.zfg.learn.exception.ServiceException;
 import com.zfg.learn.model.dto.SubscriptionDto;
 import com.zfg.learn.model.po.Subscription;
 import com.zfg.learn.service.SubscriptionService;
+import com.zfg.learn.until.BiliUntil;
 import com.zfg.learn.until.SeleniumBiliUntil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -24,6 +26,7 @@ import java.util.List;
 public class SubscriptionServiceImpl implements SubscriptionService {
     @Autowired
     SubscriptionMapper subMapper;
+    BiliUntil biliUntil = BiliUntil.getUntil();
 
     /**
      * 修改订阅状态
@@ -55,15 +58,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 }
 
                 try {
-                    //通过sn操作bot账号去关注内容 todo zmark
-                    SeleniumBiliUntil selenium = SeleniumBiliUntil.getInstance();
-                    selenium.subscribe(subscription.getFid(), subscription.getType());
+                    Long fid = subscription.getFid().longValue();
+                    if (subscription.getType() == Const.Sub.TYPE_MEDIA){
+                        biliUntil.followMd(fid);
+                    } else if (subscription.getType() == Const.Sub.TYPE_UP){
+                        biliUntil.followUp(fid);
+                    }
 
                     //关注成功后让bot订阅该内容然后插入数据库
                     Subscription botSub = subscription;
                     botSub.setUid(UserEnum.BOT.getUid());
                     subMapper.insert(botSub);
-                } catch (SeleniumException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                     throw new ServiceException(e.getMessage());
                 }

@@ -203,6 +203,10 @@ public class CatchApi {
         return result;
     }
 
+
+
+
+
     //发送请求并且携带参数
     public String request(String originalUrl, String data) throws IOException {
         String result = "";
@@ -257,6 +261,11 @@ public class CatchApi {
         return result;
     }
 
+    public String request(String originalUrl, HashMap<String, String> header, String method) throws IOException{
+        return this.request(originalUrl, header, null, method);
+    }
+
+
     /**
      * 最多选择版
      * @param originalUrl
@@ -293,12 +302,12 @@ public class CatchApi {
         //发送数据
         if (data != null){
             connection.setDoOutput(true);
+            OutputStream outputStream = connection.getOutputStream();
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, "utf-8");
+            PrintWriter printWriter = new PrintWriter(outputStreamWriter);
+            printWriter.println(data);
+            printWriter.flush();
         }
-        OutputStream outputStream = connection.getOutputStream();
-        OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, "utf-8");
-        PrintWriter printWriter = new PrintWriter(outputStreamWriter);
-        printWriter.println(data);
-        printWriter.flush();
 
         // 通过连接对象获取一个输入流，向远程读取
         if (connection.getResponseCode() == 200) {

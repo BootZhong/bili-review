@@ -5,18 +5,50 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * bili until
+ * bili until 目前仅支持单例
+ * 内部用season 外部用media
  * @author bootzhong
  */
 public class BiliUntil {
     private String SESSDATA;
     private String bili_jct;
     private String buvid3;
-    private String authCookie;
+    private boolean isInit;
 
+    private static BiliUntil biliUntil;
     CatchApi catchApi = new CatchApi();
 
-    public BiliUntil(String SESSDATA, String bili_jct, String buvid3){
+    private BiliUntil(){}
+
+    public static BiliUntil getUntil(){
+        synchronized (BiliUntil.class){
+            if (biliUntil == null){
+                biliUntil = new BiliUntil();
+            }
+        }
+
+        return biliUntil;
+    }
+
+    //初始化
+    public void init(String SESSDATA, String bili_jct, String buvid3) throws IOException {
+        if (isInit){
+            return;
+        }
+
+        this.SESSDATA = SESSDATA;
+        this.bili_jct = bili_jct;
+        this.buvid3 = buvid3;
+        followUp(35274219l);
+        this.isInit = true;
+    }
+
+    public boolean isInit(){
+        return isInit;
+    }
+
+    //更新
+    public void updateAuth(String SESSDATA, String bili_jct, String buvid3){
         this.SESSDATA = SESSDATA;
         this.bili_jct = bili_jct;
         this.buvid3 = buvid3;
@@ -53,18 +85,27 @@ public class BiliUntil {
     /**
      * 订阅/取订 番剧
      */
-    public void followMd(Long season_id){
+    public void followMd(Long season_id) throws IOException {
         modifyMdFollow(season_id, 1);
     }
 
     /**
      * 取订阅番剧
      */
-    public void unFollowMd(Long season_id){
+    public void unFollowMd(Long season_id) throws IOException {
        modifyMdFollow(season_id, 0);
     }
 
-    private void modifyMdFollow(Long season_id, Integer type){
+    /**
+     * 获取自己的动态列表
+     */
+    public String getDynamicList() throws IOException {
+        HashMap map = new HashMap();
+        map.put("cookie", getAuthCookie());
+        return catchApi.request(Api.DYNAMIC_URL, map, "GET");
+    }
+
+    private void modifyMdFollow(Long season_id, Integer type) throws IOException {
         String url = "";
         if (type == 1){
             url = Api.FOLLOW_MEDIA;
@@ -76,13 +117,10 @@ public class BiliUntil {
 
         HashMap header = new HashMap();
         header.put("cookie", getAuthCookie());
+        header.put("referer", "https://www.bilibili.com/");
         String data = "csrf="+bili_jct+"&season_id="+season_id;
 
-        try {
-            catchApi.request(url, header, data, "POST");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        catchApi.request(url, header, data, "POST");
     }
 
     private String getAuthCookie(){
@@ -99,5 +137,7 @@ public class BiliUntil {
         String RELATION_MODIFY = "https://api.bilibili.com/x/relation/modify";
         String FOLLOW_MEDIA = "https://api.bilibili.com/pgc/web/follow/add";
         String UNFOLLOW_MEDIA = "https://api.bilibili.com/pgc/web/follow/del";
+        String DYNAMIC_URL = "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/dynamic_new?uid=20736117&type_list=268435455&from=weball&platform=web";
+
     }
 }

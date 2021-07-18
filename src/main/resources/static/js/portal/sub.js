@@ -213,10 +213,10 @@ function search() {
                 let is_follow = data.data.is_follow;
 
                 if (type == TYPE_MEDIA){
-                    id = data.data.media_id;
+                    id = data.data.season_id;
                     img = data.data.cover;
                     name = data.data.title;
-                    href = "https://www.bilibili.com/bangumi/media/md"+id;
+                    href = "https://www.bilibili.com/bangumi/media/md"+ data.data.media_id;
                 } else {
                     id = data.data.mid;
                     img = data.data.avatar;

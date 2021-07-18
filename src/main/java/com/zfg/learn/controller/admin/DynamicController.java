@@ -3,6 +3,7 @@ package com.zfg.learn.controller.admin;
 import com.zfg.learn.common.ServerResponse;
 import com.zfg.learn.thread.DynamicConsumer;
 import com.zfg.learn.thread.DynamicListener;
+import com.zfg.learn.until.BiliUntil;
 import com.zfg.learn.until.SeleniumBiliUntil;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +21,7 @@ public class DynamicController {
      */
     @PostMapping("/dynamic/listener/start")
     public ServerResponse startListener(){
-        if (SeleniumBiliUntil.getInstance().isInitialized()){
+        if (BiliUntil.getUntil().isInit()){
             //如果是被暂停了就继续
             if (listener.isAlive()){
                 if (listener.isStop()){

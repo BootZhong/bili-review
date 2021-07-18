@@ -2,19 +2,23 @@ package com.zfg.learn.service.serviceImpl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.zfg.learn.common.Const;
+import com.zfg.learn.dao.DynamicMapper;
 import com.zfg.learn.dao.SubscriptionMapper;
 import com.zfg.learn.model.bo.QQTask;
 import com.zfg.learn.model.po.Dynamic;
 import com.zfg.learn.model.po.DynamicStat;
 import com.zfg.learn.service.DynamicService;
 import com.zfg.learn.until.CatchApi;
+import com.zfg.learn.until.EmailUntil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -24,6 +28,8 @@ import java.util.List;
 public class DynamicServiceImpl implements DynamicService {
     @Autowired
     SubscriptionMapper subMapper;
+    @Autowired
+    DynamicMapper dynamicMapper;
 
     @Override
     public void pushDynamic(Dynamic dynamic) {
@@ -37,13 +43,17 @@ public class DynamicServiceImpl implements DynamicService {
         CatchApi catchApi = new CatchApi();
 
         //设置发送两次 todo 连续失败两次后  就把保存日志存在数据库中
-        String result = "";
-        Integer ReSendTimes = 2;
         try {
             catchApi.request("http://127.0.0.1:8081/qqbot/push", JSONObject.toJSONString(task));
+            //存一份到数据库作为记录
+            dynamicMapper.insert(dynamic);
             //推送失败的日志
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (DuplicateKeyException e){
+            e.printStackTrace();
+            //出现主键重复问题
+            System.out.println("出现不该出现的问题，请注意!!!!!");
         }
     }
 

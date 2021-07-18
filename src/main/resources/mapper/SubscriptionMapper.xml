@@ -26,6 +26,7 @@
         from subscription s, user u
         where s.uid = u.uid
         and s.fid = #{fid}
+        and status = 1
     </select>
 
     <select id="selectByMultiple" parameterType="com.zfg.learn.model.query.SubscriptionQuery" resultType="com.zfg.learn.model.po.Subscription">
@@ -60,7 +61,7 @@
         select s.type, s.status, s.fid,
         a.title as name, a.cover as cover
         from subscription s left join animation a
-        on s.fid = a.media_id
+        on s.fid = a.season_id
         where status = 1
         and type = 0
         <if test="uid != null">

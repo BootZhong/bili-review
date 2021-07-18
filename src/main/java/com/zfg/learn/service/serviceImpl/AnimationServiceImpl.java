@@ -98,8 +98,10 @@ public class AnimationServiceImpl implements AnimationService {
         animationMapper.insertAnimation(animation);
         //设置比分并插入数据库
         Rating rating = animation.getRating();
-        rating.setMedia_id(media_id);
-        ratingMapper.insertRating(rating);
+        if (rating != null){
+            rating.setMedia_id(media_id);
+            ratingMapper.insertRating(rating);
+        }
         return animation;
     }
 }

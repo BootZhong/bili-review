@@ -4,19 +4,14 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.zfg.learn.common.Const;
 import com.zfg.learn.config.BeanContext;
-import com.zfg.learn.dao.AnimationMapper;
-import com.zfg.learn.model.po.Animation;
 import com.zfg.learn.model.po.Dynamic;
 import com.zfg.learn.model.po.DynamicStat;
-import com.zfg.learn.until.CatchApi;
+import com.zfg.learn.until.BiliUntil;
 import com.zfg.learn.until.DynamicBlockingQueue;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * type 1:动态转发 2：自己发表的动态 4：自己发表的无图片动态 8：视频投稿 动漫：512
@@ -27,11 +22,10 @@ import java.util.List;
 public class DynamicListener extends Thread{
     private boolean isStop = false;
     private DynamicBlockingQueue dynamicQueue = DynamicBlockingQueue.getInstance();
+    private BiliUntil biliUntil = BiliUntil.getUntil();
     private static DynamicListener dynamicListener;
     private volatile String cookie; //保证内存可见性
     RedisTemplate redisTemplate = BeanContext.getBean("redisTemplate");
-    private final String DYNAMIC_URL = "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/dynamic_new?uid=20736117&type_list=268435455&from=weball&platform=web";
-    CatchApi catchApi = new CatchApi();
 
     private DynamicListener(){
 
@@ -46,17 +40,10 @@ public class DynamicListener extends Thread{
         return dynamicListener;
     }
 
-    public void setCookie(String cookie){
-        this.cookie = cookie;
-    }
-
     @Override
     public void run() {
         HashMap hashMap = new HashMap();
         String json;
-        if (cookie == null){
-            return;
-        }
         while (true){
             try {
                 //如果停止工作则进入睡眠状态 等待唤醒
@@ -75,7 +62,7 @@ public class DynamicListener extends Thread{
 
                 //请求Api并获取数据
                 hashMap.put(Const.COOKIE, cookie);
-                json = catchApi.getJsonFromApiByHeader(DYNAMIC_URL, hashMap);
+                json = biliUntil.getDynamicList();
                 //获取最新页码
                 Long cursor = (Long) redisTemplate.opsForValue().get("dynamic:cursor");
                 JSONObject data = JSONObject.parseObject(json).getJSONObject("data");
@@ -129,8 +116,6 @@ public class DynamicListener extends Thread{
         }
     }
 
-    /** 用来转行media和season_id**/
-    private AnimationMapper animationMapper = BeanContext.getBean(AnimationMapper.class);
     /**
      * 解析动态
      * @param jsonObject
@@ -146,13 +131,11 @@ public class DynamicListener extends Thread{
         // 开始解析
         dynamic.setId(dynamic_id);
         dynamic.setType(type);
+        dynamic.setCtime(desc.getInteger("timestamp"));
         //番剧类型单独处理
         if (type == Const.Dynamic.MEDIA || type == Const.Dynamic.TV_SHOW){
             JSONObject apiSeasonInfo = card.getJSONObject("apiSeasonInfo");
-            Long season_id = apiSeasonInfo.getLong("season_id");
-            //把seasonId转行成media_id
-            Integer media_id = animationMapper.selectBySeasonId(season_id).getMedia_id();
-            dynamic.setAuthorId(Long.valueOf(media_id));
+            dynamic.setAuthorId(Long.valueOf(apiSeasonInfo.getLong("season_id")));
             dynamic.setAuthorName(apiSeasonInfo.getString("title"));
             dynamic.setUrl(card.getString("url"));
 

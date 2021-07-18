@@ -51,7 +51,6 @@ public class SeleniumController {
         Cookie sessData = cookieList.stream()
                 .filter(e -> e.getName().equals("SESSDATA")).findFirst().get();
         String token = sessData.getName()+"="+sessData.getValue();
-        DynamicListener.getInstance().setCookie(token);
 
         return ServerResponse.createBySuccess();
     }

@@ -150,6 +150,12 @@
             <artifactId>commons-io</artifactId>
             <version>2.4</version>
         </dependency>
+        <!--token-->
+        <dependency>
+            <groupId>org.bitbucket.b_c</groupId>
+            <artifactId>jose4j</artifactId>
+            <version>0.7.8</version>
+        </dependency>
     </dependencies>
 
     <build>
